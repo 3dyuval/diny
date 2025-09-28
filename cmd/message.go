@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// messageCmd represents the message command
+// This file should only work in non-interactive environment
 var messageCmd = &cobra.Command{
 	Use:   "message",
 	Short: "Generate commit message and output to stdout",
@@ -36,7 +36,7 @@ Examples:
 		diff := string(gitDiff)
 		userConfig, err := config.Load()
 
-		commitMessage, _, err := commit.CreateCommitMessage(diff, userConfig)
+		commitMessage, err := commit.CreateCommitMessage(diff, userConfig)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error generating commit message: %v\n", err)
 			os.Exit(1)

@@ -86,31 +86,82 @@ func RunConfigurationSetup() config.UserConfig {
 	return userConfig
 }
 
+type InitOption string
+
+const (
+	ConfigureProject InitOption = "configure"
+	InstallHooks     InitOption = "hooks"
+)
+
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize Diny configuration with an interactive setup",
-	Long: `Initialize Diny configuration with an interactive setup.
+	Short: "Initialize Diny for your project",
+	Long: `Initialize Diny for your project with interactive setup options.
 
-This command will guide you through configuring your commit message preferences:
+You can choose to:
+- Configure project settings (commit message preferences)
+- Install git hooks (auto-populate commit messages)
+
+Configuration includes:
 - Emoji: Add emoji prefixes to commit messages
 - Format: Conventional commits or free-form messages
 - Tone: Professional, casual, or friendly
 - Length: Short, normal, or detailed messages
 
-The configuration will be saved to .git/diny-config.json in your git repository.`,
+Git hooks will automatically populate commit messages using diny when you run 'git commit'.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		userConfig := RunConfigurationSetup()
+		var selectedOption InitOption
 
-		err := config.Save(userConfig)
+		// Ask user what they want to initialize
+		err := huh.NewSelect[InitOption]().
+			Title("What would you like to initialize?").
+			Options(
+				huh.NewOption("Configure project settings", ConfigureProject),
+				huh.NewOption("Install git hooks", InstallHooks),
+			).
+			Value(&selectedOption).
+			Run()
+
 		if err != nil {
-			fmt.Printf("Error saving configuration: %v\n", err)
+			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
 
-		fmt.Println()
-		config.PrintConfiguration(userConfig)
-		ui.RenderTitle("Configuration saved!")
+		// Execute based on selection
+		switch selectedOption {
+		case ConfigureProject:
+			runConfigurationSetup()
+		case InstallHooks:
+			runHookInstallation()
+		}
 	},
+}
+
+func runConfigurationSetup() {
+	ui.RenderTitle("🔧 Configuration Setup")
+	userConfig := RunConfigurationSetup()
+
+	err := config.Save(userConfig)
+	if err != nil {
+		fmt.Printf("Error saving configuration: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println()
+	config.PrintConfiguration(userConfig)
+	ui.RenderTitle("✅ Configuration saved!")
+}
+
+func runHookInstallation() {
+	ui.RenderTitle("🪝 Git Hook Installation")
+
+	if err := installGitHook(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error installing git hook: %v\n", err)
+		os.Exit(1)
+	}
+
+	ui.RenderTitle("✅ Git hook installed!")
+	fmt.Println("Now when you run 'git commit', diny will pre-populate your commit message.")
 }
 
 func init() {

@@ -120,7 +120,7 @@ function! DinyCommitBuffer()
   autocmd BufWritePost <buffer> execute '!git commit -F' expand('%:p') | bdelete!
 endfunction
 command! DinyBuffer call DinyCommitBuffer()
-```
+```messageCmd represents the message command
 
 ### Emacs
 ```elisp

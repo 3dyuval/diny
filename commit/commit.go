@@ -8,7 +8,7 @@ import (
 	"github.com/dinoDanic/diny/ui"
 	"github.com/spf13/cobra"
 )
-
+//This file should only work in interactive
 func Main(cmd *cobra.Command, args []string) {
 	fmt.Println()
 
