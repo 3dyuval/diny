@@ -3,7 +3,6 @@ package commit
 import (
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/dinoDanic/diny/config"
 	"github.com/dinoDanic/diny/ui"
@@ -13,12 +12,7 @@ import (
 func Main(cmd *cobra.Command, args []string) {
 	fmt.Println()
 
-	gitDiffCmd := exec.Command("git", "diff", "--cached",
-		"-U3", "--no-color", "--ignore-all-space", "--ignore-blank-lines",
-		":(exclude)*.lock", ":(exclude)*package-lock.json", ":(exclude)*yarn.lock",
-		":(exclude)node_modules/", ":(exclude)dist/", ":(exclude)build/")
-
-	gitDiff, err := gitDiffCmd.Output()
+	gitDiff, err := GetStagedDiff()
 
 	if err != nil {
 		ui.RenderError(fmt.Sprintf("Failed to get git diff: %v", err))
